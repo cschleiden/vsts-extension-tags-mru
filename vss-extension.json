@@ -1,0 +1,87 @@
+{
+    "manifestVersion": 1,
+    "id": "tags-mru",
+    "version": "0.1.0",
+    "name": "Tags MRU",
+    "scopes": [ "vso.work", "vso.work_write" ],
+    "description": "This is the extension file from the contributions guide example on GitHub.  Feel free to add or remove sections as you see fit.",
+    "publisher": "cschleiden",
+    "public": false,
+    "icons": {
+        "default": "img/logo.png"
+    },
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],
+    "tags": [
+        "Sample"
+    ],
+    "links": {
+        "home": {
+            "uri": "https://bit.ly"
+        },
+        "getstarted": {
+            "uri": "https://bit.ly"
+        },
+        "learn": {
+            "uri": "https://bit.ly"
+        },
+        "support": {
+            "uri": "https://bit.ly"
+        },
+        "repository": {
+            "uri": "https://bit.ly"
+        },
+        "issues": {
+            "uri": "https://bit.ly"
+        }
+    },
+    "branding": {
+        "color": "rgb(220, 235, 252)",
+        "theme": "light"
+    },
+    "files": [
+        {
+            "path": "img",
+            "addressable": true
+        },
+        {
+            "path": "scripts",
+            "addressable": true
+        },
+        {
+            "path": "index.html",
+            "addressable": true
+        }
+    ],
+    "categories": [
+        "Integrate"
+    ],
+    "contributions": [
+        {
+            "id": "tags-mru-work-item-menu",
+            "type": "ms.vss-web.action-provider",
+            "description": "",
+            "targets": [
+                "ms.vss-work-web.work-item-context-menu"
+            ],
+            "properties": {
+                "group": "contributed",
+                "uri": "index.html"
+            }
+        },
+        {
+            "id": "tags-mru-work-item-form-observer",
+            "type": "ms.vss-work-web.work-item-notifications",
+            "description": "Gets events about the current work item form for the 'Try Me!' toolbar button",
+            "targets": [
+                "ms.vss-work-web.work-item-form"
+            ],
+            "properties": {
+                "uri": "index.html"
+            }
+        }
+    ]
+}
