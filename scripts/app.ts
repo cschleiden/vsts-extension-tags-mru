@@ -217,10 +217,10 @@ VSS.register("tags-mru-work-item-form-observer", (context) => {
             WorkItemTagsListener.getInstance().commitTagsForWorkItem(args.id);
         },
         onReset: (args) => {
-            WorkItemTagsListener.getInstance().clearForWorkItem(args.id);
+            WorkItemTagsListener.getInstance().setNewTags(args.id, []);
         },
         onRefreshed: (args) => {
-            WorkItemTagsListener.getInstance().clearForWorkItem(args.id);
+            WorkItemTagsListener.getInstance().setNewTags(args.id, []);
         }
     };
 });
