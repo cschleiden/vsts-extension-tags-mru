@@ -4,7 +4,7 @@
     "version": "0.1.0",
     "name": "Tags MRU",
     "scopes": [ "vso.work", "vso.work_write" ],
-    "description": "This is the extension file from the contributions guide example on GitHub.  Feel free to add or remove sections as you see fit.",
+    "description": "Keeps a list of the most recently used work item tags and allows adding them with a single click.",
     "publisher": "cschleiden",
     "public": false,
     "icons": {
@@ -20,22 +20,7 @@
     ],
     "links": {
         "home": {
-            "uri": "https://bit.ly"
-        },
-        "getstarted": {
-            "uri": "https://bit.ly"
-        },
-        "learn": {
-            "uri": "https://bit.ly"
-        },
-        "support": {
-            "uri": "https://bit.ly"
-        },
-        "repository": {
-            "uri": "https://bit.ly"
-        },
-        "issues": {
-            "uri": "https://bit.ly"
+            "uri": "http://www.cschleiden.de"
         }
     },
     "branding": {
