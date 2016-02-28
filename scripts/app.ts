@@ -8,6 +8,9 @@ import TFS_Wit_Services = require("TFS/WorkItemTracking/Services");
 
 import VSS_Extension_Service = require("VSS/SDK/Services/ExtensionData");
 
+/** Maximum size of MRU */
+const MAX_TAGS = 5;
+
 class Tags {
     /** Key used for document service */
     private static KEY: string = "tags";
@@ -36,21 +39,22 @@ class Tags {
         }
     }
 
-    private dict: { [tag: string]: boolean } = {};
+    private dict: { [tag: string]: number } = {};
     private queue: string[] = [];
 
     constructor(private maxCount: number) {
     }
 
     public addTag(tag: string) {
-        if (this.dict[tag]) {
-            var idx = this.queue.indexOf(tag);
+        if (typeof this.dict[tag] !== "undefined") {
+            // Remove tag from current position
+            var idx = this.dict[tag];
             this.queue.splice(idx, 1);
-        } else {
-            this.dict[tag] = true;
         }
 
+        // Add tag in first position
         this.queue.unshift(tag);
+        this.dict[tag] = 0;
 
         this.prune();
     }
@@ -76,9 +80,6 @@ class Tags {
         }
     }
 }
-
-/** Maximum size of MRU */
-const MAX_TAGS = 5;
 
 // Proactively initialize instance and load tags
 Tags.getInstance();
