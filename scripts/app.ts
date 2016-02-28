@@ -103,6 +103,7 @@ VSS.register("tags-mru-work-item-menu", {
                     text: tag,
                     title: `Add tag: ${tag}`,
                     action: () => {
+                        // Get work items, add the new tag to the list of existing tags, and then update
                         var client = TFS_Wit_Client.getClient();
 
                         client.getWorkItems(ids).then((workItems) => {
@@ -212,7 +213,9 @@ VSS.register("tags-mru-work-item-form-observer", (context) => {
             });
         },
         onUnloaded: (args) => {
-            WorkItemTagsListener.getInstance().clearForWorkItem(args.id);
+            // When the users choses "Save & Close", unloaded is fired before the save event, so
+            // do not clean for now. 
+            //WorkItemTagsListener.getInstance().clearForWorkItem(args.id);
         },
         onSaved: (args) => {
             WorkItemTagsListener.getInstance().commitTagsForWorkItem(args.id);
