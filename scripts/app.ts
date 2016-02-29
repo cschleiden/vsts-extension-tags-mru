@@ -213,8 +213,8 @@ VSS.register("tags-mru-work-item-form-observer", (context) => {
             });
         },
         onUnloaded: (args) => {
-            // When the users choses "Save & Close", unloaded is fired before the save event, so
-            // do not clean for now. 
+            // When the users choses "Save & Close", unloaded is sometimes fired before the save event, so
+            // do not clean for now.
             //WorkItemTagsListener.getInstance().clearForWorkItem(args.id);
         },
         onSaved: (args) => {
