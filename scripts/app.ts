@@ -39,22 +39,20 @@ class Tags {
         }
     }
 
-    private dict: { [tag: string]: number } = {};
     private queue: string[] = [];
 
     constructor(private maxCount: number) {
     }
 
     public addTag(tag: string) {
-        if (typeof this.dict[tag] !== "undefined") {
-            // Remove tag from current position
-            var idx = this.dict[tag];
+        // Remove tag from current position
+        var idx = this.queue.indexOf(tag);
+        if (idx !== -1) {
             this.queue.splice(idx, 1);
-        }
+        }        
 
         // Add tag in first position
         this.queue.unshift(tag);
-        this.dict[tag] = 0;
 
         this.prune();
     }
@@ -75,7 +73,7 @@ class Tags {
     private prune() {
         if (this.queue.length > this.maxCount) {
             for (var i = 0; i < this.queue.length - MAX_TAGS; ++i) {
-                delete this.dict[this.queue.pop()];
+                this.queue.pop();
             }
         }
     }
@@ -95,6 +93,14 @@ VSS.register("tags-mru-work-item-menu", {
             ids = [context.id];
         }
 
+        let calledWithActiveForm = false;
+
+        if (!ids && context.workItemId) {
+            // Work item form menu
+            ids = [context.workItemId];
+            calledWithActiveForm = true;
+        }
+
         return Tags.getInstance().then(tags => {
             var childItems: IContributedMenuItem[] = [];
 
@@ -103,18 +109,35 @@ VSS.register("tags-mru-work-item-menu", {
                     text: tag,
                     title: `Add tag: ${tag}`,
                     action: () => {
-                        // Get work items, add the new tag to the list of existing tags, and then update
-                        var client = TFS_Wit_Client.getClient();
+                        if (calledWithActiveForm) {                            
+                            // Modify active work item
+                            TFS_Wit_Services.WorkItemFormService.getService().then(wi => {
+                                (<IPromise<string>>wi.getFieldValue("System.Tags")).then(changedTagsRaw => {
+                                    let tags = splitTags(changedTagsRaw)
+                                        .map(t => t.trim())
+                                        .filter(t => !!t);
+                                    
+                                    if (tags.indexOf(tag) === -1) {                                    
+                                        wi.setFieldValue("System.Tags", 
+                                            tags.concat([tag])
+                                                .join(";"));
+                                    }
+                                });
+                            });
+                        } else {
+                            // Get work items, add the new tag to the list of existing tags, and then update
+                            var client = TFS_Wit_Client.getClient();
 
-                        client.getWorkItems(ids).then((workItems) => {
-                            for (var workItem of workItems) {
-                                var prom = client.updateWorkItem([{
-                                    "op": "add",
-                                    "path": "/fields/System.Tags",
-                                    "value": (workItem.fields["System.Tags"] || "") + ";" + tag
-                                }], workItem.id);
-                            }
-                        });
+                            client.getWorkItems(ids).then((workItems) => {
+                                for (var workItem of workItems) {
+                                    var prom = client.updateWorkItem([{
+                                        "op": "add",
+                                        "path": "/fields/System.Tags",
+                                        "value": (workItem.fields["System.Tags"] || "") + ";" + tag
+                                    }], workItem.id);
+                                }
+                            });
+                        }
                     }
                 });
             });
@@ -172,9 +195,10 @@ class WorkItemTagsListener {
     public commitTagsForWorkItem(workItemId: number): IPromise<any> {
         return Tags.getInstance().then(tags => {
             // Generate intersection between old and new tags
-            var diffTags = this.newTags[workItemId].filter(t => this.orgTags[workItemId].indexOf(t) < 0);
+            var orgTags = this.orgTags[workItemId] || [];
+            
+            var diffTags = (this.newTags[workItemId] || []).filter(t => orgTags.indexOf(t) < 0);
 
-            // 
             for (var tag of diffTags) {
                 if (!tag) {
                     continue;
@@ -182,8 +206,6 @@ class WorkItemTagsListener {
 
                 tags.addTag(tag);
             }
-
-            this.clearForWorkItem(workItemId);
 
             // Save tags to server
             tags.persist();
@@ -197,6 +219,15 @@ function splitTags(rawTags: string): string[] {
 
 // Register work item change listener
 VSS.register("tags-mru-work-item-form-observer", (context) => {
+    var setOriginalTags = (args) => {
+        // Get original tags from work item
+        TFS_Wit_Services.WorkItemFormService.getService().then(wi => {
+            (<IPromise<string>>wi.getFieldValue("System.Tags")).then(changedTagsRaw => {                    
+                WorkItemTagsListener.getInstance().setOriginalTags(args.id, splitTags(changedTagsRaw));
+            });
+        });
+    };
+    
     return {
         onFieldChanged: (args) => {
             if (args.changedFields["System.Tags"]) {
@@ -204,14 +235,7 @@ VSS.register("tags-mru-work-item-form-observer", (context) => {
                 WorkItemTagsListener.getInstance().setNewTags(args.id, splitTags(changedTagsRaw));
             }   
         },
-        onLoaded: (args) => {
-            // Get original tags from work item
-            TFS_Wit_Services.WorkItemFormService.getService().then(wi => {
-                (<IPromise<string>>wi.getFieldValue("System.Tags")).then(changedTagsRaw => {                    
-                    WorkItemTagsListener.getInstance().setOriginalTags(args.id, splitTags(changedTagsRaw));
-                });
-            });
-        },
+        onLoaded: (args) => setOriginalTags,
         onUnloaded: (args) => {
             // When the users choses "Save & Close", unloaded is sometimes fired before the save event, so
             // do not clean for now.
@@ -220,11 +244,7 @@ VSS.register("tags-mru-work-item-form-observer", (context) => {
         onSaved: (args) => {
             WorkItemTagsListener.getInstance().commitTagsForWorkItem(args.id);
         },
-        onReset: (args) => {
-            WorkItemTagsListener.getInstance().setNewTags(args.id, []);
-        },
-        onRefreshed: (args) => {
-            WorkItemTagsListener.getInstance().setNewTags(args.id, []);
-        }
+        onReset: (args) => setOriginalTags,
+        onRefreshed: (args) => setOriginalTags
     };
 });
