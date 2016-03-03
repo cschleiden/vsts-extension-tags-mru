@@ -1,12 +1,12 @@
 {
     "manifestVersion": 1,
     "id": "tags-mru",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "name": "Tags MRU",
     "scopes": [ "vso.work", "vso.work_write" ],
     "description": "Keeps a list of the most recently used work item tags and allows adding them with a single click.",
     "publisher": "cschleiden",
-    "public": false,
+    "public": true,
     "icons": {
         "default": "img/logo.png"
     },
@@ -16,10 +16,15 @@
         }
     ],
     "tags": [
-        "Sample"
+        "Tags"
     ],
+    "content": {
+        "details": {
+            "path": "overview.md"
+        }
+    },
     "links": {
-        "home": {
+        "support": {
             "uri": "http://www.cschleiden.de"
         }
     },
@@ -39,10 +44,14 @@
         {
             "path": "index.html",
             "addressable": true
+        },
+        {
+            "path": "overview.md",
+            "addressable": true
         }
     ],
     "categories": [
-        "Integrate"
+        "Plan and track"
     ],
     "contributions": [
         {
