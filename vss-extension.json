@@ -1,7 +1,7 @@
 {
     "manifestVersion": 1,
     "id": "tags-mru",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "name": "Tags MRU",
     "scopes": [ "vso.work", "vso.work_write" ],
     "description": "Keeps a list of the most recently used work item tags and allows adding them with a single click.",
