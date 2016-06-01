@@ -83,7 +83,7 @@ class Tags {
 Tags.getInstance();
 
 // Register context menu action
-VSS.register("tags-mru-work-item-menu", {
+var actionProvider = {
     getMenuItems: (context) => {
         // Not all areas use the same format for passing work item ids. "ids" for Queries
         // "workItemIds" for backlogs
@@ -155,7 +155,10 @@ VSS.register("tags-mru-work-item-menu", {
             }]
         });
     }
-});
+};
+
+VSS.register("tags-mru-work-item-menu", actionProvider);
+VSS.register("cschleiden.tags-mru.tags-mru-work-item-menu", actionProvider);
 
 /**
  *  
@@ -217,8 +220,7 @@ function splitTags(rawTags: string): string[] {
     return rawTags.split(";").map(t => t.trim());
 }
 
-// Register work item change listener
-VSS.register("tags-mru-work-item-form-observer", (context) => {
+var formObserver = (context) => {
     var setOriginalTags = (args) => {
         // Get original tags from work item
         TFS_Wit_Services.WorkItemFormService.getService().then(wi => {
@@ -247,4 +249,8 @@ VSS.register("tags-mru-work-item-form-observer", (context) => {
         onReset: (args) => setOriginalTags,
         onRefreshed: (args) => setOriginalTags
     };
-});
+};
+
+// Register work item change listener
+VSS.register("tags-mru-work-item-form-observer", formObserver);
+VSS.register("cschleiden.tags-mru.tags-mru-work-item-form-observer", formObserver);
